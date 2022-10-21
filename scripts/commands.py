@@ -1,18 +1,14 @@
-import datetime
-
 import wandb
 from omegaconf import DictConfig
 
 from scripts.init import ex
 import utils.utils_cswm as utils
-
-from scripts.helpers_model import get_model, save_model
-from scripts.training_joint import train_loop
 from scripts.eval import eval_model
-
+from scripts.helpers import get_train_data
+from scripts.helpers_lightning import init_repr_lightning_trainer
+from scripts.helpers_model import get_model, save_model
 from scripts.training_decoupled import train_decoupled_loop
-from scripts.helpers import get_train_data, init_wandb
-from scripts.training_lightning import init_data_model_trainer
+from scripts.training_joint import train_loop
 
 
 @ex.command
@@ -47,8 +43,8 @@ def train_representation(_log, _run, model_train, enable_wandb, project_wandb, n
     from pytorch_lightning.callbacks import LearningRateMonitor
 
     # > Init W&B logger for PL
-    logger = pl_loggers.WandbLogger(project=project_wandb, name='Train-' + name_time)
     # > Note: it will init W&B only if no W&B initialized before!
+    logger = pl_loggers.WandbLogger(project=project_wandb, name='Train-' + name_time)
 
     from utils.utils_lightning import ImageLogCallback
     trainer = Trainer(
@@ -66,7 +62,7 @@ def train_representation(_log, _run, model_train, enable_wandb, project_wandb, n
         callbacks=[LearningRateMonitor("step"), ImageLogCallback(), ],  # > by default enabling logger
     )
 
-    network_module, data_module = init_data_model_trainer()
+    network_module, data_module = init_repr_lightning_trainer()
 
     trainer.fit(model=network_module, datamodule=data_module)
 

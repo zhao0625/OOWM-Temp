@@ -1,12 +1,11 @@
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
 from torch import optim
 from torch.utils.data import DataLoader
 from torchvision import utils as vutils
 
-from utils.utils_lightning import Tensor, to_rgb_from_tensor
 from utils.utils_cswm import ObsOnlyDataset
+from utils.utils_lightning import Tensor, to_rgb_from_tensor
 
 
 class SlotAttentionNetworkModule(pl.LightningModule):

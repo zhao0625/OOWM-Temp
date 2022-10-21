@@ -1,39 +1,30 @@
-import copy
-import datetime
 import os
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 
 import torch
-import wandb
 import yaml
-from matplotlib import pyplot as plt
 from omegaconf import DictConfig, OmegaConf
 from torch.utils import data
-import numpy as np
 
-from algorithms import deprecated_world_model
-from algorithms import world_model
-from algorithms import vanilla_world_model
-import utils.utils_cswm as utils
+from algorithms import contrastive_wm
+from algorithms import homomorphic_wm
 from utils import utils_cswm as utils
 
 
 def init_model(model_train, device):
-    # [initialize using kwargs]
-    # FIXME check keys for back compatibility
-    if 'vanilla_cswm' in model_train and model_train.vanilla_cswm:
-        model = vanilla_world_model.VanillaContrastiveSWM(**model_train).to(device)
-    # > Model: decoupled version with Homomorphic Attention
-    elif model_train.decoupled_homo_att:
-        model = world_model.DecoupledHomomorphicWM(**model_train).to(device)
-    # > Model: deprecated version based on attention on masks
-    elif 'mask_att_cswm' in model_train and model_train.mask_att_cswm:
-        model = deprecated_world_model.MaskContrastiveSWM(**model_train).to(device)
-    # > Model: deprecated version of jointly trained model
-    elif model_train.homo_slot_att:
-        model = deprecated_world_model.PixelContrastiveSWM(**model_train).to(device)
-        # >>> must have N filters and N actions, or K filters and K actions
-        assert model_train.action_mapping == model_train.extra_filter
+    """
+    Initialize models using kwargs
+    """
+
+    # > Model: Homomorphic Object-oriented World Model (only decoupled training)
+    # (We didn't do jointly training due to stability, but technically possible)
+    if model_train.decoupled_homo_att:
+        model = homomorphic_wm.DecoupledHomomorphicWM(**model_train).to(device)
+
+    # > Model: vanilla Contrastive Structured World Model (jointly training)
+    elif model_train.vanilla_cswm:
+        model = contrastive_wm.VanillaContrastiveSWM(**model_train).to(device)
+
     else:
         raise ValueError
 
@@ -131,10 +122,9 @@ def get_model_data(model_path, data_path, cuda=True, batch_size=10):
     """
     model, model_config = get_model_checkpoint(
         save_folder=model_path,
-        input_shape=(3, 50, 50),
         cuda=cuda,
         load=True,
-        return_config=True,  # TODO also config
+        return_config=True,
     )
 
     dataset, loader = get_data(data_path=data_path, batch_size=batch_size)

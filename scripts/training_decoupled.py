@@ -7,7 +7,6 @@ from omegaconf import DictConfig
 from torch.utils import data
 
 from scripts.init import ex
-
 from scripts.eval import eval_model
 from scripts.helpers_model import save_model
 from utils.utils_visualize import plot_binding

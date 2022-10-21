@@ -1,13 +1,11 @@
 import copy
 import datetime
 import os
-from collections import OrderedDict
 
 import torch
+import wandb
 import yaml
 from matplotlib import pyplot as plt
-from omegaconf import DictConfig
-import wandb
 
 from scripts.run import ex
 from utils.utils_loading import get_model_checkpoint
@@ -94,7 +92,7 @@ def save_model(_run, _log, model_train, save_folder, name_time,
             plt.savefig(os.path.join(model_folder, 'visualization-reconstruction.png'))
 
         if 'Visualization/ActionAttentionMatrix' in train_info:
-            # TODO update visualization
+            # > update visualization
             plt.imshow(train_info['Visualization/ActionAttentionMatrix'], cmap=plt.cm.Blues, vmin=0, vmax=1)
             # plt.colorbar()  # > no color bar since it's already showed in training function
             plt.savefig(os.path.join(model_folder, 'visualization-binding.png'))
