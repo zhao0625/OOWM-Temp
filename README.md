@@ -8,8 +8,13 @@
     pip install -r requirements.txt
 
 
-## Generate data
+## Step 1: Generate data
 The script and default config file are located in `./gen_data` folder. Run the following commands under root folder to generate data for basic `Shapes` environment (with all shapes and absolute-orientation actions: north, south, west, and east) and `Rush Hour` environment (with only triangles relative-and orientation actions: forward, backward, left, right). 
+
+- We use the block pushing environments, which has two tasks: Shapes and Rush Hour. Shapes task has all different shapes that we can push, while Rush Hour only has
+- A key concept in our work is Object Library. It is like a vocabulary in natural languages, which contains all possible objects appeared in each scene. We first generate an object library $\mathbb{L}$ with $|\mathbb{L}| = N$ objects, and then sample different scenes $\mathbb{O}_i$ with a fixed number of objects $|\mathbb{O}_i| = K$.
+- We sample $100$ scenes, and then collect episodes or transitions from those scenes. We sample a fixed number of episodes for each scene $n=100$ with a fixed number of length $l=100$.
+    - check number!!!
 
 
 ### Basic Shapes environment (saving pickle file for persistent object library)
@@ -52,7 +57,44 @@ The script and default config file are located in `./gen_data` folder. Run the f
     config_shapes.load_pickle_library=False \
     config_shapes.load_pickle_file=None
 
-## Demo Run - to update
+## Step 2: Training a representation module checkpoint
+
+- Overview
+    - For learning object representations (unsupervised object discovery), we use Slot Attention (Locatello, NeurIPS’20) and freeze the network.
+    - The most important characteristic is that objects do not naturally have canonical ordering. Thus, when we train the downstream model, such as a transition model, it needs to align objects between different steps in order to correctly compute the prediction error and other quantities.
+- Implementation
+    - The code of Slot Attention is adopted from an open-source PyTorch implementation (https://github.com/untitled-ai/slot_attention), where the training is done by PyTorch Lightning.
+    - It will train a separate network and save a checkpoint, which will be later freeze in the training of the transition model.
+- Training strategy
+    - Since we assume we have an object library $\mathbb{L}$ with $|\mathbb{L}| = N$ objects (e.g., $N=10$), even though each scene has $K$ objects (e.g., $K=5$), we only need to train one representation module on all $N$ objects.
+    - The model is trained to reconstruct all objects using mean-square reconstruction loss in the pixel space.
+    - Empirically, we found this strategy works well: the trained model can accurately reconstruct al objects in the library even with $N = 50$ objects.
+
+
+#### Command
+
+    python -m scripts.run -p -l INFO train_separately with config_model \
+    enable_wandb=True watch_model=True \
+    model_train.decoupled_homo_att=True \
+    train_components='r' \
+    enable_pl=True \
+    use_obj_config_dataset=True \
+    model_train.dataset='datasets/shapes_library_100train1eval_jan24_cascade_n50k5_train.h5' \
+    model_eval.dataset='datasets/shapes_library_100train1eval_jan24_cascade_n50k5_eval.h5' \
+    model_train.num_objects=5 \
+    model_train.num_objects_total=50 \
+    model_train.encoder_type='specific-small2' \
+    model_train.embedding_dim=4 \
+    model_train.slot_size=16 \
+    model_train.hidden_dims_encoder='(32,32,16)' \
+    model_train.representation.epochs=200 \
+    model_train.transition.epochs=0 \
+    representation_checkpoint=None \
+    stats_collection='homo_slot_att_debug' \
+    save_folder='checkpoints/decoupled-homo-slot-attention-experiments' \
+    description='train: representation'
+
+#### Command (previous)
 
     python -m scripts.run -p -l INFO train with config_model \
     model_train.dataset='datasets/shapes_library_n10k5_train_debug_config_unlimited.h5' \
@@ -73,6 +115,41 @@ The script and default config file are located in `./gen_data` folder. Run the f
     model_train.same_config_ratio=0.5 \
     stats_collection='homo_slot_att_debug' \
     description='debug - config + recon'
+
+
+## Step 3: learn transition model with trained representation module 
+
+The last step should give you a checkpoint of representation module.
+Use that as the input to the "representation_checkpoint" argument, and run the following command.
+
+**THIS IS NOT FINISHED.**
+
+Note that the last step should use N=50 dataset, but here we only train for smaller N, such as N=10,20,30. So you would need to use the corresponding dataset and change `model_train.num_objects_total` accordingly.
+
+
+#### Command
+
+    python -m scripts.run -p -l INFO train_separately with config_model \
+    enable_wandb=True watch_model=True \
+    model_train.decoupled_homo_att=True \
+    train_components='t' \
+    enable_pl=False \
+    use_obj_config_dataset=True \
+    model_train.dataset='datasets/shapes_library_100train1eval_jan24_cascade_n50k5_train.h5' \
+    model_eval.dataset='datasets/shapes_library_100train1eval_jan24_cascade_n50k5_eval.h5' \
+    model_train.num_objects=5 \
+    model_train.num_objects_total=20 \
+    model_train.encoder_type='specific-small2' \
+    model_train.embedding_dim=4 \
+    model_train.slot_size=16 \
+    model_train.hidden_dims_encoder='(32,32,16)' \
+    model_train.representation.epochs=0 \
+    model_train.transition.epochs=100 \
+    dir_wandb='/mnt_host/zlf-local-data' \
+    stats_collection='homo_slot_att_debug' \
+    save_folder='checkpoints' \
+    representation_checkpoint=<PATH TO YOUR TRAINED REPRESENTATION MODULE> \
+    description='train: transition with representation checkpoint'
 
 
 ## Structure (to update)
