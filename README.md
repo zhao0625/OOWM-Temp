@@ -20,8 +20,6 @@ The script and default config file are located in `./gen_data` folder. Run the f
 ### Basic Shapes environment (saving pickle file for persistent object library)
 
     python -m gen_data.run_data_gen \
-    gen_env='Shapes' \
-    gen_mode='joint' \
     config_shapes.data_folder='./datasets' \
     config_shapes.data_prefix='shapes_library_100train1eval' \
     config_shapes.shapes='all' \
@@ -40,8 +38,6 @@ The script and default config file are located in `./gen_data` folder. Run the f
 ### Rush Hour environment
 
     python -m gen_data.run_data_gen \
-    gen_env='Shapes' \
-    gen_mode='joint' \
     config_shapes.data_folder='./datasets' \
     config_shapes.data_prefix='rush-hour_library_100train1eval' \
     config_shapes.shapes='rush_hour' \
