@@ -1,11 +1,12 @@
 import wandb
 from omegaconf import DictConfig
 
+import utils.utils_func
 from scripts.init import ex
-import utils.utils_cswm as utils
+import utils.utils_dataset as utils
 from scripts.eval import eval_model
 from scripts.helpers import get_train_data
-from scripts.helpers_lightning import init_repr_lightning_trainer
+from scripts.helpers_lightning import init_repr_lightning_trainer, ImageLogCallback
 from scripts.helpers_model import get_model, save_model
 from scripts.training_decoupled import train_decoupled_loop
 from scripts.training_joint import train_loop
@@ -46,7 +47,6 @@ def train_representation(_log, _run, model_train, enable_wandb, project_wandb, n
     # > Note: it will init W&B only if no W&B initialized before!
     logger = pl_loggers.WandbLogger(project=project_wandb, name='Train-' + name_time)
 
-    from utils.utils_lightning import ImageLogCallback
     trainer = Trainer(
         logger=logger,
         default_root_dir=model_train.folder_pl,
@@ -94,7 +94,7 @@ def train_separately(_log, _run, watch_model, eval_in_training,
     # > Init new model
     if components == ('representation', 'transition') or components == ('representation',):
         model_object = get_model(load=False)
-        model_object.apply(utils.weights_init)  # > Init model after creating
+        model_object.apply(utils.utils_func.weights_init)  # > Init model after creating
 
     # > Load checkpoint if just train transition model
     elif components == ('transition',):
@@ -160,7 +160,7 @@ def train_jointly(_log, _run, watch_model, eval_in_training):
 
     # > Init model
     model_object = get_model(load=False)
-    model_object.apply(utils.weights_init)  # > Init model after creating
+    model_object.apply(utils.utils_func.weights_init)  # > Init model after creating
 
     # [W&B watch] (only call once)
     if watch_model:
@@ -189,7 +189,7 @@ def train_jointly_deprecated(_log, _run, eval_in_training):
     _log.warning('>>> This is the old training paradigm that jointly train the model')
 
     model_object = get_model(load=False)
-    model_object.apply(utils.weights_init)  # > Init model after creating
+    model_object.apply(utils.utils_func.weights_init)  # > Init model after creating
 
     # [train]
     model_object = train_loop(model=model_object)

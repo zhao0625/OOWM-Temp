@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from torch import nn
 
-import utils.utils_cswm as utils
+import utils.utils_dataset as utils  # TODO
+import utils.utils_func as utils_f
 from algorithms.modules_encoders_temp import TransitionMLP, TransitionGNN, EncoderCNNSmall, EncoderCNNMedium, \
     EncoderCNNLarge
 from algorithms.modules_encoders import EncoderMLP
@@ -19,7 +20,7 @@ class VanillaContrastiveSWM(nn.Module):
         num_objects: Number of object slots.
 
         num_objects_total: number of total objects in the library.
-        extra_filter: if use extra filters and if enable extra key (in self-attention)
+        extra_filter: if using extra filters and if enable extra key (in self-attention)
     """
 
     def __init__(self, embedding_dim, input_dims, hidden_dim, action_dim,
@@ -140,8 +141,10 @@ class VanillaContrastiveSWM(nn.Module):
         next_state = self.encode(obs=next_obs)
 
         # > Encode to one-hot here! - consider N actions
-        action = utils.to_one_hot(action,
-                                  self.action_dim * (self.num_objects_total if self.extra_filter else self.num_objects))
+        action = utils_f.to_one_hot(
+            action,
+            self.action_dim * (self.num_objects_total if self.extra_filter else self.num_objects)
+        )
 
         # >>> Using negative samples: loading from data or random shuffle
         if with_neg_obs:
@@ -171,7 +174,7 @@ class VanillaContrastiveSWM(nn.Module):
         convert action id to one-hot action
         """
         # [convert to one-hot actions of N objects]
-        action_vec = utils.to_one_hot(
+        action_vec = utils_f.to_one_hot(
             action,
             self.action_dim * (self.num_objects_total if self.extra_filter else self.num_objects)
         )

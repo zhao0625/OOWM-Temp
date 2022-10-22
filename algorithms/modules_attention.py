@@ -6,8 +6,7 @@ from torch.nn import functional as F
 
 from algorithms.modules_encoders import EncoderGeneric, DecoderGeneric, EncoderSmall, DecoderSmall, EncoderMedium, \
     DecoderMedium, EncoderSmall2, DecoderSmall2
-from utils.utils_slot_attention import Tensor
-from utils.utils_slot_attention import assert_shape
+from utils.utils_func import Tensor, assert_shape
 
 
 class SlotAttention(nn.Module):

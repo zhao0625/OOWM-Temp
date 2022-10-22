@@ -5,7 +5,8 @@ import torch
 import torchvision
 from torch import nn
 
-import utils.utils_cswm as utils
+import utils.utils_dataset as utils
+import utils.utils_func
 from algorithms.modules_attention import ActionBindingAttention, DecoupledSlotAttentionModel
 from algorithms.modules_encoders_temp import TransitionMLP, TransitionGNN
 
@@ -205,7 +206,7 @@ class DecoupledHomomorphicWM(nn.Module):
         convert action id to one-hot action
         """
         # [convert to one-hot actions of N objects]
-        action_vec = utils.to_one_hot(action, self.action_dim * self.num_objects_total)
+        action_vec = utils.utils_func.to_one_hot(action, self.action_dim * self.num_objects_total)
         # [reshape ground actions to (B x) N x 4]
         action_vec = action_vec.view(len(action), self.num_objects_total, self.action_dim)
 

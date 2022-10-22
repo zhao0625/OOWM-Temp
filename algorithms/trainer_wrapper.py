@@ -4,8 +4,8 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchvision import utils as vutils
 
-from utils.utils_cswm import ObsOnlyDataset
-from utils.utils_lightning import Tensor, to_rgb_from_tensor
+from scripts.helpers_lightning import Tensor, to_rgb_from_tensor
+from utils.utils_dataset import ObsOnlyDataset
 
 
 class SlotAttentionNetworkModule(pl.LightningModule):

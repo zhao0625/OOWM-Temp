@@ -8,7 +8,7 @@ from torch.utils import data
 
 from algorithms import contrastive_wm
 from algorithms import homomorphic_wm
-from utils import utils_cswm as utils
+from utils import utils_dataset as utils
 
 
 def init_model(model_train, device):
@@ -47,7 +47,6 @@ def get_model_checkpoint(save_folder, cuda=True,
     if load:
         assert os.path.isfile(os.path.join(save_folder, 'model_config.yaml'))
         with open(os.path.join(save_folder, 'model_config.yaml'), 'r') as fp:
-            # model_train = yaml.load(fp, Loader=yaml.FullLoader)
             model_train_load = yaml.load(fp, Loader=yaml.FullLoader)
 
         # > Update config

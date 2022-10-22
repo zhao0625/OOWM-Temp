@@ -8,8 +8,9 @@ import torch
 import wandb
 from omegaconf import DictConfig
 
+import utils.utils_func
 from scripts.init import ex
-import utils.utils_cswm as utils
+import utils.utils_dataset as utils
 from scripts.eval import eval_model
 from scripts.helpers_model import save_model
 from scripts.helpers import get_train_data
@@ -47,7 +48,7 @@ def train_loop(_run, _log, model_train, cuda, enable_wandb, watch_model, use_obj
     # [data]
     train_loader, dataset = get_train_data()
 
-    model.apply(utils.weights_init)
+    model.apply(utils.utils_func.weights_init)
     optimizer = get_optimizer(model=model)
 
     # FIXME get loss func

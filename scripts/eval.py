@@ -1,21 +1,16 @@
-import copy
 import datetime
-import os
 from collections import defaultdict
 
 import numpy as np
 import torch
 import wandb
-import yaml
-from omegaconf import DictConfig
-from torch.utils import data
-
 from pymongo import MongoClient
 from sacred.observers import MongoObserver
 from torch.utils import data
 
+import utils.utils_dataset as utils
+import utils.utils_func
 from scripts.init import ex
-import utils.utils_cswm as utils
 
 # [mongo database]
 mongo_url = 'mongodb://10.200.206.34:27017'
@@ -189,7 +184,7 @@ def eval_loop(_log, model_eval, num_steps, cuda, model, loader, prefix=None):
 
         _log.info(f'state sizes: {next_state_cat.size()}, {pred_state_flat.size()}, {pred_state_flat.dtype}')
 
-        dist_matrix = utils.pairwise_distance_matrix(
+        dist_matrix = utils.utils_func.pairwise_distance_matrix(
             next_state_flat, pred_state_flat)
         dist_matrix_diag = torch.diag(dist_matrix).unsqueeze(-1)
         dist_matrix_augmented = torch.cat(

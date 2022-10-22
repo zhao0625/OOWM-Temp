@@ -2,9 +2,9 @@ from typing import Tuple
 
 from torch import nn
 
-from utils import utils_cswm as utils
-from utils.utils_cswm import get_act_fn
-from utils.utils_slot_attention import conv_transpose_out_shape, assert_shape, build_grid, Tensor
+import utils.utils_func
+from utils import utils_dataset as utils
+from utils.utils_func import get_act_fn, Tensor, conv_transpose_out_shape, assert_shape, build_grid
 
 
 class EncoderMLP(nn.Module):
@@ -23,8 +23,8 @@ class EncoderMLP(nn.Module):
 
         self.ln = nn.LayerNorm(hidden_dim)
 
-        self.act1 = utils.get_act_fn(act_fn)
-        self.act2 = utils.get_act_fn(act_fn)
+        self.act1 = utils.utils_func.get_act_fn(act_fn)
+        self.act2 = utils.utils_func.get_act_fn(act_fn)
 
     def forward(self, ins):
         h_flat = ins.view(ins.size(0), self.num_objects, self.input_dim)  # > explicitly give batch size

@@ -2,7 +2,7 @@ import wandb
 from omegaconf import DictConfig
 from torch.utils import data
 
-import utils.utils_cswm as utils
+import utils.utils_dataset as utils
 from scripts.run import ex
 
 
